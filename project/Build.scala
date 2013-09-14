@@ -8,7 +8,7 @@ import Project.Initialize
 import Keys._
 import Defaults._
 
-object DistPlugin extends Plugin {
+object DistPlugin2 extends Plugin {
 
   object DistKeys {
     val dist = TaskKey[File]("dist", "Build a distribution, assemble the files, create a launcher and make an archive.")
@@ -134,8 +134,9 @@ object EmbeddedJettyBuild extends Build {
   )
 
   // dist settings
-  import DistPlugin._
-  import DistPlugin.DistKeys._
+  import org.scalatra.sbt.DistPlugin
+  import org.scalatra.sbt.DistPlugin._
+  import org.scalatra.sbt.DistPlugin.DistKeys._
 
   val myDistSettings = DistPlugin.distSettings ++ Seq(
     mainClass in Dist := Some("ScalatraLauncher"),
@@ -152,6 +153,7 @@ object EmbeddedJettyBuild extends Build {
   lazy val project = Project("scalatra-embedded-jetty", file("."))
     .settings(scalatraWithJRebel :_*)
     .settings(projectSettings :_*)
-    .settings(distSettings :_*)
+    .settings(myDistSettings :_*)
+    // .settings(com.typesafe.sbt.SbtNativePackager.packagerSettings :_*)
 
 }
