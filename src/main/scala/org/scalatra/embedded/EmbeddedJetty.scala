@@ -21,7 +21,7 @@ class EmbeddedJetty extends EmbeddedJettyStack with ApiFormats with JacksonJsonS
   }
 
   protected implicit val jsonFormats: Formats = {
-    org.json4s.DefaultFormats + new MotorcyclePreferenceSerializer
+    org.json4s.DefaultFormats // + new MotorcyclePreferenceSerializer
   }
 
   override protected def renderPipeline: RenderPipeline = {
@@ -34,6 +34,7 @@ class EmbeddedJetty extends EmbeddedJettyStack with ApiFormats with JacksonJsonS
         case Some(jv: JValue) => jv
         case None => super.renderPipeline(a)
       }
+    case JsonResult(jv) => jv
   }
 
   class MotorcyclePreferenceSerializer
@@ -48,6 +49,20 @@ class EmbeddedJetty extends EmbeddedJettyStack with ApiFormats with JacksonJsonS
         }
       })) {}
 
+  implicit object MotorcycleFormat extends JsonFormat[MotorcyclePreferences] {
+    def read(value: JValue): MotorcyclePreferences = {
+      (for {
+        stuff <- (value \ "stuff").extractOpt[String]
+      } yield new MotorcyclePreferences(stuff)).get
+    }
+
+    def write(obj: MotorcyclePreferences): JValue = {
+      "stuff" -> obj.stuff
+    }
+  }
+
+  case class JsonResult(jv: JValue)
+
   before() {
     contentType = formats("json")
   }
@@ -58,6 +73,20 @@ class EmbeddedJetty extends EmbeddedJettyStack with ApiFormats with JacksonJsonS
 
   get("/json-2") {
     MotorcyclePreferencesCaseClass("foo")
+  }
+
+  def route: Any = {
+    new MotorcyclePreferences("test")
+  }
+
+  def writeToJson(x: Any) = ???
+
+  get("/json-3") {
+    new MotorcyclePreferences("test").asJValue
+  }
+
+  get("/json-4") {
+    JsonResult(new MotorcyclePreferences("test").asJValue)
   }
 
   get("/say-html") {
